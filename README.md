@@ -1,7 +1,7 @@
 # animated-bar-chart-in-R
 
-What: Animated bar chart in R
-How: Using `ggplot2` and `gganimate` 
+- What: Animated bar chart in R
+- How: Using `ggplot2` and `gganimate` 
 
 **Acknowledgment:** The code used here is heavily borrowed (*You can say, inspired and copied*) from the answers of this Stack Overflow Question [Animated sorted bar chart with bars overtaking each other](https://stackoverflow.com/questions/53162821/animated-sorted-bar-chart-with-bars-overtaking-each-other)
 
