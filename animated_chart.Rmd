@@ -1,0 +1,163 @@
+---
+title: "Creating Animated Race Bar Chart in R using GDP Data"
+author: "Harry Aginta"
+output:
+  html_document:
+    code_download: true
+    df_print: paged
+    toc: true
+    toc_float:
+      collapsed: false
+      smooth_scroll: false
+    toc_depth: 4
+    number_sections: true
+    code_folding: "show"
+    theme: "cosmo"
+    highlight: "monochrome"
+  pdf_document: default
+  html_notebook:
+    code_folding: show
+    highlight: monochrome
+    number_sections: yes
+    theme: cosmo
+    toc: yes
+    toc_depth: 4
+    toc_float:
+      collapsed: no
+      smooth_scroll: no
+  word_document: default
+---
+
+<style>
+h1.title {font-size: 18pt; color: DarkBlue;} 
+body, h1, h2, h3, h4 {font-family: "Palatino", serif;}
+body {font-size: 12pt;}
+/* Headers */
+h1,h2,h3,h4,h5,h6{font-size: 14pt; color: #00008B;}
+body {color: #333333;}
+a, a:hover {color: #8B3A62;}
+pre {font-size: 12px;}
+</style>
+
+This project uses GDP dataset downloaded from WorldBank. The dataset can be accessed in 
+
+
+# Part A: Loading libraries and doing data cleaning
+## Libraries
+```{r message=FALSE, warning=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+
+library(tidyverse)
+library(janitor)
+library(gganimate)
+#install.packages("gifski")
+library(gifski)
+library(readr)
+```
+
+## Import GDP data
+```{r}
+gdp <- read_delim("gdp_constant.csv", 
+    ";", escape_double = FALSE, trim_ws = TRUE)
+```
+
+```{r}
+head(gdp)
+```
+
+```{r}
+gdp
+```
+
+Drop all rows with NA
+```{r}
+gdp_balance <- na.omit(gdp)
+gdp_balance
+```
+
+Drop non-country rows
+```{r}
+gdp_balance <- filter(gdp_balance, !(country_code %in% c("EAP", "EAR", "EAS", "EMU", "FCS", "HIC", "HPC", "IBD", "IBT", "IDA", "IDB", "LAC", "LCN", "LMC", "LMY", "LTE", "MIC", "NAC", "OED", "PST", "SSA", "SSF", "TEA", "TLA", "TSA", "TSS", "UMC", "WLD")))
+gdp_balance
+```
+
+Transform dataframe into long shape
+```{r}
+gdp_long <- gdp_balance %>% 
+  mutate_at(vars(contains("yr")),as.numeric) %>% 
+  gather(year,gdp,5:54)
+```
+
+## Save the dataframe that is ready to use
+```{r}
+write_csv(gdp_long, "gdp_ready.csv")
+```
+
+# Part B: Building the static plots using ggplot
+## Import the dataframe
+```{r}
+gdp_ready <- read_csv("gdp_ready.csv")
+gdp_ready
+```
+
+```{r}
+gdp_set <- gdp_ready %>%
+  group_by(year) %>%
+  mutate(rank = rank(-gdp),
+         gdp_rel = gdp/gdp[rank==1],
+         gdp_lbl = paste0(" ",round(gdp/1e9))) %>%
+  group_by(country_name) %>% 
+  filter(rank <=30) %>%
+  ungroup()
+```
+
+```{r}
+static_plot <- ggplot(gdp_set, aes(rank, group = country_name)) +  
+  geom_tile(aes(y = gdp/2,
+                height = gdp, fill = Region,
+                width = 0.9), alpha = 0.8, color = NA) +
+  geom_text(aes(y = 0, label = paste(country_name, " ")), vjust = 0.2, hjust = 1) +
+  geom_text(aes(y=gdp,label = gdp_lbl, hjust=0)) +
+  geom_text(aes(x=30, y=max(gdp) , label = as.factor(year)), vjust = 0.2, alpha = 0.5,  col = "gray", size = 20) +
+  coord_flip(clip = "off", expand = FALSE) +
+  scale_y_continuous(labels = scales::comma) +
+  scale_x_reverse() +
+  scale_fill_discrete(guide = guide_legend(title.theme = element_text(
+      size = 20), label.theme = element_text(size = 15))) +
+  theme(axis.line=element_blank(),
+        axis.text.x=element_blank(),
+        axis.text.y=element_blank(),
+        axis.ticks=element_blank(),
+        axis.title.x=element_blank(),
+        axis.title.y=element_blank(),
+        panel.background=element_blank(),
+        panel.border=element_blank(),
+        panel.grid.major=element_blank(),
+        panel.grid.minor=element_blank(),
+        panel.grid.major.x = element_line( size=.1, color="grey" ),
+        panel.grid.minor.x = element_line( size=.1, color="grey" ),
+        plot.title=element_text(size=25, hjust=0, face="bold", colour="black", vjust=-1),
+        plot.subtitle=element_text(size=18, hjust=1, face="italic", color="grey"),
+        plot.caption =element_text(size=14, hjust=1, face="italic", color="grey"),
+        plot.background=element_blank(),
+       plot.margin = margin(2,2, 2, 4, "cm"))
+```
+
+# Part C: Animating the static plot
+```{r}
+animated <- static_plot + transition_states(year,
+transition_length = 3, state_length = 1, wrap = FALSE) +
+  view_follow(fixed_x = TRUE)  +
+  labs(title = 'Top 30 World GDP, 1970-2019',  
+       subtitle  =  "GDP in Billions USD",
+       caption  = "Data Source: World Bank Data")
+```
+
+## Render the animated chart to .gif file
+```{r}
+animate(animated, 150, fps = 5, end_pause = 30, width = 1500, height = 1000, 
+        renderer = gifski_renderer("anim_gdp.gif"))
+```
+
+
+
