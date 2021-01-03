@@ -3,32 +3,17 @@
 - What: Animated bar chart in R
 - How: Using `ggplot2` and `gganimate` 
 
-**Acknowledgment:** The code used here is heavily borrowed (*You can say, inspired and copied*) from the answers of this Stack Overflow Question [Animated sorted bar chart with bars overtaking each other](https://stackoverflow.com/questions/53162821/animated-sorted-bar-chart-with-bars-overtaking-each-other)
-
-### Potential Errors
-
-If you faced this error `Error: The gifski package is required to use gifski_renderer`
-
-Please install `gifski` and `png` package and try again.
+**Acknowledgment:** 
+This project uses the modified code from several sources:
+- [Towardsdatascience - create animated bar charts using r](https://towardsdatascience.com/create-animated-bar-charts-using-r-31d09e5841da)
+- [R bloggers - how to create a bar chart race in r](https://www.r-bloggers.com/2019/04/how-to-create-a-bar-chart-race-in-r-mapping-united-states-city-population-1790-2010/)
 
 
 ### Final Output (GIF):
 
-![GIF](gganim.gif)
+![GIF](anim_gdp.gif)
 
-### Codes
-
-+ `gdp_data_cleanup.R` - Cleaning up the data downloaded from WorldBank Data Site
-+ `animated_bar_plot_in_R.R` - Building Animated Bar Plots 
-
-
-### Reproducibility 
-
-**Packages used**:
-
-+ `gganimate`
-+ `tidyverse`
 
 ### Data Source:
 
-The origin input data (`csv`) has been downloaded from [databank.worldbank.org](https://databank.worldbank.org/data/reports.aspx?source=2&series=NY.GDP.MKTP.CD&country=#)
+This project uses GDP database downloaded from [databank.worldbank.org](https://databank.worldbank.org/data/reports.aspx?source=2&series=NY.GDP.MKTP.CD&country=#)
