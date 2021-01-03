@@ -1,4 +1,4 @@
-# animated-bar-chart-in-R
+# Creating-animated-bar-chart-in-R
 
 - What: Animated bar chart in R
 - How: Using `ggplot2` and `gganimate` 
