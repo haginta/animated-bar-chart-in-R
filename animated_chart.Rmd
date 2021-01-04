@@ -156,10 +156,11 @@ transition_length = 3, state_length = 0, wrap = FALSE) +
        caption  = "Data Source: World Bank Data")
 ```
 
+
 ## Render the animated chart to .gif file
-```{r}
+```{r message=FALSE, warning=FALSE}
 animate(animated, 150, fps = 5, end_pause = 30, width = 1500, height = 1000, 
-        renderer = gifski_renderer("anim_gdp1.gif"))
+        renderer = gifski_renderer("anim_gdp.gif"))
 ```
 
 
