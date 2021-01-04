@@ -71,19 +71,19 @@ gdp
 
 Drop non-country rows
 ```{r}
-gdp_balance <- filter(gdp, !(country_code %in% c("ARB", "CEB", "CSS","EAP", "EAR", "EAS", "ECA", "ECS", "EMU", "EUU", "FCS", "HIC", "HPC", "IBD", "IBT", "IDA", "IDB", "IDX", "INX", "LAC", "LCN", "LDC", "LIC", "LMC", "LMY", "LTE", "MIC", "MEA", "MNA", "NAC", "OED", "OSS", "PST", "PSS", "PRE", "SSA", "SSF", "TEA", "TLA", "TMN", "TSA", "TSS", "UMC", "WLD")))
-gdp_balance
+gdp_clean <- filter(gdp, !(country_code %in% c("ARB", "CEB", "CSS","EAP", "EAR", "EAS", "ECA", "ECS", "EMU", "EUU", "FCS", "HIC", "HPC", "IBD", "IBT", "IDA", "IDB", "IDX", "INX", "LAC", "LCN", "LDC", "LIC", "LMC", "LMY", "LTE", "MIC", "MEA", "MNA", "NAC", "OED", "OSS", "PST", "PSS", "PRE", "SSA", "SSF", "TEA", "TLA", "TMN", "TSA", "TSS", "UMC", "WLD")))
+gdp_clean
 ```
 
 Drop all rows with NA in "Region" column
 ```{r}
-gdp_balance <- subset(gdp_balance, !is.na(Region))
-gdp_balance
+gdp_clean <- subset(gdp_clean, !is.na(Region))
+gdp_clean
 ```
 
 Transform the dataframe into long shape
 ```{r}
-gdp_long <- gdp_balance %>% 
+gdp_long <- gdp_clean %>% 
   mutate_at(vars(contains("yr")),as.numeric) %>% 
   gather(year,gdp,5:54)
 ```
@@ -100,6 +100,7 @@ gdp_ready <- read_csv("gdp_ready.csv")
 gdp_ready
 ```
 
+## Arrange the ranking
 ```{r}
 gdp_set <- gdp_ready %>%
   group_by(year) %>%
@@ -111,6 +112,7 @@ gdp_set <- gdp_ready %>%
   ungroup()
 ```
 
+## Building the static plot
 ```{r}
 static_plot <- ggplot(gdp_set, aes(rank, group = country_name)) +  
   geom_tile(aes(y = gdp/2,
@@ -152,7 +154,7 @@ transition_length = 3, state_length = 0, wrap = FALSE) +
     enter_fade()+
     exit_fade() +
   labs(title = 'Top 30 World GDP, 1970-2019',  
-       subtitle  =  "GDP in Billions USD",
+       subtitle  =  "GDP in Billions USD (constant 2010)",
        caption  = "Data Source: World Bank Data")
 ```
 
