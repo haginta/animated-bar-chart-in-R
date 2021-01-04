@@ -1,5 +1,5 @@
 ---
-title: "Creating Animated Race Bar Chart in R using GDP Data"
+title: "Creating Animated Race Bar Chart in R"
 author: "Harry Aginta"
 output:
   html_document:
@@ -39,10 +39,10 @@ a, a:hover {color: #8B3A62;}
 pre {font-size: 12px;}
 </style>
 
-This project uses GDP dataset downloaded from WorldBank. The dataset can be accessed in 
+This project uses GDP dataset downloaded from the WorldBank Database. The dataset can be accessed in [GitHub Repository](https://github.com/haginta/animated-bar-chart-in-R)
 
 
-# Part A: Loading libraries and doing data cleaning
+# Part A: Loading libraries and data pre-processing
 ## Libraries
 ```{r message=FALSE, warning=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
@@ -55,9 +55,9 @@ library(gifski)
 library(readr)
 ```
 
-## Import GDP data
+## Load GDP data
 ```{r}
-gdp <- read_delim("gdp_constant.csv", 
+gdp <- read_delim("gdp_ori.csv", 
     ";", escape_double = FALSE, trim_ws = TRUE)
 ```
 
@@ -69,19 +69,19 @@ head(gdp)
 gdp
 ```
 
-Drop all rows with NA
-```{r}
-gdp_balance <- na.omit(gdp)
-gdp_balance
-```
-
 Drop non-country rows
 ```{r}
-gdp_balance <- filter(gdp_balance, !(country_code %in% c("EAP", "EAR", "EAS", "EMU", "FCS", "HIC", "HPC", "IBD", "IBT", "IDA", "IDB", "LAC", "LCN", "LMC", "LMY", "LTE", "MIC", "NAC", "OED", "PST", "SSA", "SSF", "TEA", "TLA", "TSA", "TSS", "UMC", "WLD")))
+gdp_balance <- filter(gdp, !(country_code %in% c("ARB", "CEB", "CSS","EAP", "EAR", "EAS", "ECA", "ECS", "EMU", "EUU", "FCS", "HIC", "HPC", "IBD", "IBT", "IDA", "IDB", "IDX", "INX", "LAC", "LCN", "LDC", "LIC", "LMC", "LMY", "LTE", "MIC", "MEA", "MNA", "NAC", "OED", "OSS", "PST", "PSS", "PRE", "SSA", "SSF", "TEA", "TLA", "TMN", "TSA", "TSS", "UMC", "WLD")))
 gdp_balance
 ```
 
-Transform dataframe into long shape
+Drop all rows with NA in "Region" column
+```{r}
+gdp_balance <- subset(gdp_balance, !is.na(Region))
+gdp_balance
+```
+
+Transform the dataframe into long shape
 ```{r}
 gdp_long <- gdp_balance %>% 
   mutate_at(vars(contains("yr")),as.numeric) %>% 
@@ -94,7 +94,7 @@ write_csv(gdp_long, "gdp_ready.csv")
 ```
 
 # Part B: Building the static plots using ggplot
-## Import the dataframe
+## Import the ready-to-use data
 ```{r}
 gdp_ready <- read_csv("gdp_ready.csv")
 gdp_ready
@@ -146,8 +146,11 @@ static_plot <- ggplot(gdp_set, aes(rank, group = country_name)) +
 # Part C: Animating the static plot
 ```{r}
 animated <- static_plot + transition_states(year,
-transition_length = 3, state_length = 1, wrap = FALSE) +
+transition_length = 3, state_length = 0, wrap = FALSE) +
   view_follow(fixed_x = TRUE)  +
+  ease_aes('linear')+
+    enter_fade()+
+    exit_fade() +
   labs(title = 'Top 30 World GDP, 1970-2019',  
        subtitle  =  "GDP in Billions USD",
        caption  = "Data Source: World Bank Data")
@@ -156,8 +159,7 @@ transition_length = 3, state_length = 1, wrap = FALSE) +
 ## Render the animated chart to .gif file
 ```{r}
 animate(animated, 150, fps = 5, end_pause = 30, width = 1500, height = 1000, 
-        renderer = gifski_renderer("anim_gdp.gif"))
+        renderer = gifski_renderer("anim_gdp1.gif"))
 ```
-
 
 
